@@ -1050,6 +1050,7 @@ container_init_setup (void *args, pid_t own_pid, char *notify_socket, int sync_s
 {
   struct container_entrypoint_s *entrypoint_args = args;
   libcrun_container_t *container = entrypoint_args->container;
+  libcrun_context_t* context = entrypoint_args->context;
   int ret;
   int has_terminal;
   cleanup_close int console_socket = -1;
@@ -1160,6 +1161,11 @@ container_init_setup (void *args, pid_t own_pid, char *notify_socket, int sync_s
         if (putenv (def->process->env[i]) < 0)
           return crun_make_error (err, errno, "putenv `%s`", def->process->env[i]);
     }
+
+  if (context->env) {
+    libcrun_warning ("Adding new ENV = %s", context->env);
+    putenv (context->env);
+  }
 
   if (getenv ("HOME") == NULL)
     {

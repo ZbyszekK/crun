@@ -38,6 +38,7 @@ struct libcrun_context_s
   crun_output_handler output_handler;
   void *output_handler_arg;
 
+  const char* env;
   int fifo_exec_wait_fd;
 
   bool systemd_cgroup;

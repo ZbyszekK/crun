@@ -158,6 +158,10 @@ crun_command_create (struct crun_global_arguments *global_args, int argc, char *
   if (UNLIKELY (ret < 0))
     return ret;
 
+  //This will be parsed out of argv and in the form of string table "const char**"
+  static const char* new_env = "DYNAMIC_TOKEN=ON";
+  crun_context.env = new_env;
+
   container = libcrun_container_load_from_file (config_file, err);
   if (container == NULL)
     libcrun_fail_with_error (0, "error loading config.json");
