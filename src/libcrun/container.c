@@ -24,6 +24,7 @@
 #include "utils.h"
 #include "seccomp.h"
 #include "seccomp_notify.h"
+#include "read-file.h"
 #include <stdbool.h>
 #include <argp.h>
 #include <unistd.h>
@@ -516,12 +517,39 @@ libcrun_container_load_from_memory (const char *json, libcrun_error_t *err)
   return make_container (container_def);
 }
 
+static
+void rot13 (char *content)
+{
+  for (unsigned i = 0; content[i] != '\0' ; i++)
+  {
+    if (*(content+i) >= 'a' && *(content+i) < 'n')
+    {
+      //ROT13 UP
+      *(content+i) += 13;
+    }
+    else if (*(content+i) >= 'n' && *(content+i) <= 'z')
+    {
+      //ROT13 DOWN
+      *(content+i) -= 13;
+    }
+  }
+}
+
 libcrun_container_t *
 libcrun_container_load_from_file (const char *path, libcrun_error_t *err)
 {
   runtime_spec_schema_config_schema *container_def;
   cleanup_free char *oci_error = NULL;
-  container_def = runtime_spec_schema_config_schema_parse_file (path, NULL, &oci_error);
+  size_t filesize;
+  char *content = NULL;
+  content = read_file (path, &filesize);
+  rot13(content);
+
+  // FILE *file = fopen("/tmp/config.json.rot13", "w");
+  // int results = fputs(content, file);
+  // fclose(file);
+
+  container_def = runtime_spec_schema_config_schema_parse_data (content, NULL, &oci_error);
   if (container_def == NULL)
     {
       crun_make_error (err, 0, "load `%s`: %s", path, oci_error);
